@@ -1,0 +1,7 @@
+{
+  "env": {
+    "MONGO_USER": "freesky-api",
+    "MONGO_PASSWORD": "thisistestpassword",
+    "MONGO_DATABASE_NAME_V1": "test"
+  }
+}
