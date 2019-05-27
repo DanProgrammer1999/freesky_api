@@ -3,9 +3,17 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const uavSchema = new Schema({
-  serial_id: {
+  serial_number: {
     type: String,
     required: true
+  },
+  color: {
+    type: String,
+    required: false
+  },
+  photo_ability: {
+    type: String,
+    required: false
   },
   model: {
     type: String,
@@ -13,7 +21,7 @@ const uavSchema = new Schema({
   },
   owner: {
     type: Schema.Types.ObjectId,
-    ref: "Owner"
+    ref: 'UserIdentity'
   }
 });
 

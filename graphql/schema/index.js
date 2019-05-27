@@ -25,8 +25,11 @@ module.exports = buildSchema(`
     password: String!
     first_name: String!
     last_name: String!
-    address: String!
-    phone_number: String!
+    paternal_name: String
+    address: String
+    passport: String!
+    uavs: [UAV!]
+    credentials: UserCredentials!
   }
 
   input UAVParams {
@@ -49,8 +52,10 @@ module.exports = buildSchema(`
     password: String!
     first_name: String!
     last_name: String!
-    address: String!
-    phone_number: String!
+    paternal_name: String
+    address: String
+    passport: String!
+    credentials: UserCredentials!
   }
 
   type RootQuery {
