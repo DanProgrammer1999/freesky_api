@@ -5,7 +5,7 @@ module.exports = buildSchema(`
     _id: ID!
     serial_number: String!
     model: UAVModel!
-    owner: Owner!
+    owner: UserIdentity!
   }
 
   type UAVModel {
@@ -40,8 +40,8 @@ module.exports = buildSchema(`
 
   input UAVParams {
     serial_number: String!
-    model: UAVModel!
-    owner: String!
+    model: ID!
+    owner: ID!
   }
 
   input UAVModelParams {
@@ -67,20 +67,21 @@ module.exports = buildSchema(`
     paternal_name: String
     address: String
     passport: String!
-    credentials: UserCredentials!
+    credentials: ID!
   }
 
   type RootQuery {
     uavs: [UAV!]!
-    owners: [Owner!]!
-    controller: [Controller!]!
+    uav_models: [UAVModel!]!
+    user_credentials: [UserCredentials!]!
+    user_identities: [UserIdentity!]!
   }
 
   type RootMutation {
     createUAV(uavInput: UAVParams): UAV
     createUAVModel(uavModelInput: UAVModelParams): UAVModel
     createCredentials(credentialsInput: CredentialsParams): UserCredentials
-    create(identityInput: IdentityParams): UserIdentity
+    createIdentity(identityInput: IdentityParams): UserIdentity
   }
 
   schema {
