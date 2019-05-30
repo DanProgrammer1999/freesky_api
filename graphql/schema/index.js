@@ -3,26 +3,32 @@ import { buildSchema } from "graphql";
 module.exports = buildSchema(`
   type UAV {
     _id: ID!
-    serial_id: String!
-    model: String!
+    serial_number: String!
+    model: UAVModel!
     owner: Owner!
   }
 
-  type Owner {
+  type UAVModel {
     _id: ID!
-    email: String
-    password: String!
-    first_name: String!
-    last_name: String!
-    address: String!
-    phone_number: String!
-    uavs: [UAV]    
+    producer: String!
+    model: String!
+    uav_type: String
+    engine_type: String
+    engines_number: Int
+    fuel_type: String
+    size: [Float!]!
+    weight: Float
   }
 
-  type Controller {
+  type UserCredentials {
     _id: ID!
-    email: String
+    email: String!
     password: String!
+    phone_number: String!
+  }
+
+  type UserIdentity {
+    _id: ID!
     first_name: String!
     last_name: String!
     paternal_name: String
@@ -33,23 +39,29 @@ module.exports = buildSchema(`
   }
 
   input UAVParams {
-    serial_id: String!
-    model: String!
+    serial_number: String!
+    model: UAVModel!
     owner: String!
   }
 
-  input OwnerParams {
-    email: String
+  input UAVModelParams {
+    producer: String!
+    model: String!
+    uav_type: String
+    engine_type: String
+    engines_number: Int
+    fuel_type: String
+    size: [Float!]!
+    weight: Float
+  }
+
+  input CredentialsParams {
+    email: String!
     password: String!
-    first_name: String!
-    last_name: String!
-    address: String!
     phone_number: String!
   }
 
-  input ControllerParams {
-    email: String
-    password: String!
+  input IdentityParams {
     first_name: String!
     last_name: String!
     paternal_name: String
@@ -66,8 +78,9 @@ module.exports = buildSchema(`
 
   type RootMutation {
     createUAV(uavInput: UAVParams): UAV
-    createOwner(ownerInput: OwnerParams): Owner
-    createController(controllerInput: ControllerParams): Controller
+    createUAVModel(uavModelInput: UAVModelParams): UAVModel
+    createCredentials(credentialsInput: CredentialsParams): UserCredentials
+    create(identityInput: IdentityParams): UserIdentity
   }
 
   schema {
