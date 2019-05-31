@@ -19,7 +19,7 @@ const uavSchema = new Schema({
       type: String,
       required: false
   },
-  engine_number: {
+  engines_number: {
     type: Number,
     required: false
   },
@@ -40,4 +40,4 @@ const uavSchema = new Schema({
 
 });
 
-module.exports = mongoose.model('UAV', uavSchema);
+module.exports = mongoose.model('UAVModel', uavSchema);
