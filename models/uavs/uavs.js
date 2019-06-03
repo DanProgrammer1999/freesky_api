@@ -16,7 +16,7 @@ const uavSchema = new Schema({
     required: false
   },
   model: {
-    type: String,
+    type: Schema.Types.ObjectId,
     required: true
   },
   owner: {
