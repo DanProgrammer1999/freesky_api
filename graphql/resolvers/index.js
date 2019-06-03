@@ -1,20 +1,22 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-underscore-dangle */
-import bcrypt from "bcryptjs";
+import bcrypt from 'bcryptjs';
 
-import responseHelper from "../../helpers/response-helper";
-import UAV from "../../models/uav";
-import Owner from "../../models/users/owner";
-import Controller from "../../models/users/controller";
+import responseHelper from '../../helpers/response-helper';
+import UAV from '../../models/uavs/uavs';
+import UAVModel from '../../models/uavs/models';
+import UserIdentity from '../../models/users/identity';
+import UserCredentials from '../../models/users/credentials';
 
-const uavs = uavIds => {
+const find_uavs = uavIds => {
   return UAV.find({ _id: { $in: uavIds } })
     .then(uavObjects =>
       uavObjects.map(uav => ({
         ...uav._doc,
         _id: uav.id,
-        owner_id: find_owner.bind(this, uav.owner_id)
+        owner: find_identity.bind(this, uav._doc.owner),
+        model: find_uav_model.bind(this, uav._doc.model)
       }))
     )
     .catch(err => {
@@ -22,17 +24,32 @@ const uavs = uavIds => {
     });
 };
 
-const find_owner = ownerId => {
-  return Owner.findById(ownerId)
+const find_identity = identityId => {
+  return UserIdentity.findById(identityId)
     .then(user => ({
       ...user._doc,
       _id: user.id,
-      uavs: uavs.bind(this, user._doc.uavs)
+      uavs: find_uavs.bind(this, user._doc.uavs),
+      credentials: find_credentials.bind(this, user._doc.credentials)
     }))
     .catch(err => {
       throw err;
     });
 };
+
+const find_credentials = id => {
+  return UserCredentials.findById(id)
+    .then(credentials => ({
+      ...credentials._doc,
+      _id: credentials.id.toString(),
+      uavs: find_uavs.bind(this, credentials._doc.uavs)
+    }))
+    .catch(err => {
+      throw err;
+    });
+};
+
+const find_uav_model = modelId => UAVModel.findById(modelId);
 
 module.exports = {
   uavs: () =>
@@ -41,38 +58,47 @@ module.exports = {
         listOfUAVs.map(uav => ({
           ...uav._doc,
           _id: uav.id,
-          creator: find_owner.bind(this, uav._doc.owner)
+          owner: find_identity.bind(this, uav.owner),
+          model: find_uav_model.bind(this, uav.model)
         }))
       )
       .catch(err => {
         throw err;
       }),
-  controllers: () =>
-    Controller.find()
-      .then(controller =>
-        controller.map(controller => ({
-          ...controller._doc,
-          _id: controller._doc._id.toString()
+  uav_models: () =>
+    UAVModel.find().catch(err => {
+      throw err;
+    }),
+  user_identities: () =>
+    UserIdentity.find()
+      .then(identities =>
+        identities.map(data => ({
+          ...data._doc,
+          _id: data._doc._id.toString(),
+          uavs: find_uavs.bind(this, data._doc.uavs),
+          credentials: find_credentials.bind(this, data._doc.credentials)
         }))
       )
       .catch(err => {
         throw err;
       }),
-  owners: () =>
-    Owner.find()
-      .then(owners =>
-        owners.map(owner => ({
-          ...owner._doc,
-          _id: owner._doc._id.toString(),
-          uavs: uavs.bind(this, owner._doc.uavs)
+  user_credentials: () =>
+    UserCredentials.find()
+      .then(credentials_list =>
+        credentials_list.map(credentials => ({
+          ...credentials._doc,
+          _id: credentials._doc._id.toString()
         }))
       )
       .catch(err => {
         throw err;
       }),
+
   createUAV: args => {
     const uav = new UAV({
-      serial_id: args.uavInput.serial_id,
+      serial_number: args.uavInput.serial_number,
+      color: args.uavInput.color,
+      photo_ability: args.uavInput.photo_ability,
       model: args.uavInput.model,
       owner: args.uavInput.owner
     });
@@ -82,15 +108,12 @@ module.exports = {
       .then(result => {
         createdUAV = {
           ...result._doc,
-          _id: result._doc._id.toString(),
-          owner: find_owner.bind(this, result._doc.owner)
+          owner: find_identity.bind(this, result._doc.owner),
+          model: find_uav_model.bind(this, result._doc.model)
         };
-        return Owner.findById(result._doc.owner);
+        return UserIdentity.findById(result._doc.owner);
       })
       .then(user => {
-        if (!user) {
-          throw new Error(responseHelper.OWNER_DOESNT_EXIST);
-        }
         user.uavs.push(uav);
         return user.save();
       })
@@ -99,59 +122,51 @@ module.exports = {
         throw err;
       });
   },
-  createController: args => {
-    return Controller.findOne({ email: args.controllerInput.email })
-      .then(user => {
-        if (user) {
-          throw new Error(responseHelper.CONTROLLER_ALREADY_EXISTS);
-        }
-        return bcrypt.hash(args.controllerInput.password, 12);
-      })
-      .then(hashPassword => {
-        const contr = new controller({
-          email: args.controllerInput.email,
-          password: hashPassword,
-          first_name: args.controllerInput.first_name,
-          last_name: args.controllerInput.last_name,
-          address: args.controllerInput.address,
-          phone_number: args.controllerInput.phone_number
-        });
-        return contr.save();
-      })
-      .then(result => ({
-        ...result._doc,
-        _id: result._doc._id.toString()
-      }))
-      .catch(err => {
-        throw err;
-      });
+  createUAVModel: args => {
+    return new UAVModel({
+      producer: args.uavModelInput.producer,
+      model: args.uavModelInput.model,
+      uav_type: args.uavModelInput.uav_type,
+      engine_type: args.uavModelInput.engine_type,
+      fuel_type: args.uavModelInput.fuel_type,
+      size: args.uavModelInput.size,
+      weight: args.uavModelInput.weight
+    }).save();
   },
-  createOwner: args => {
-    return Owner.findOne({ email: args.ownerInput.email })
-      .then(user => {
-        if (user) {
-          throw new Error(responseHelper.OWNER_ALREADY_EXISTS);
+  createCredentials: args => {
+    const input = args.credentialsInput;
+    return UserCredentials.findOne({ email: input.email })
+      .then(credentials => {
+        if (credentials) {
+          throw new Error(responseHelper.CREDENTIALS_ALREADY_EXIST);
         }
 
-        return bcrypt.hash(args.ownerInput.password, 12);
+        return bcrypt.hash(input.password, 9);
       })
       .then(hashPassword => {
-        const owner = new Owner({
-          email: args.ownerInput.email,
-          password: hashPassword,
-          first_name: args.ownerInput.first_name,
-          last_name: args.ownerInput.last_name,
-          address: args.ownerInput.address,
-          phone_number: args.ownerInput.phone_number
+        const newCredentials = new UserCredentials({
+          email: input.email,
+          phone_number: input.phone_number,
+          password: hashPassword
         });
-        return owner.save();
-      })
-      .then(result => ({
-        ...result._doc,
-        _id: result._doc._id.toString()
-      }))
-      .catch(err => {
-        throw err;
+
+        return newCredentials.save();
       });
+  },
+  createIdentity: args => {
+    const input = args.identityInput;
+
+    return find_credentials(input.credentials).then(credentials => {
+      const identity = new UserIdentity({
+        first_name: input.first_name,
+        last_name: input.last_name,
+        paternal_name: input.paternal_name,
+        address: input.address,
+        passport: input.passport,
+        credentials
+      });
+
+      return identity.save();
+    });
   }
 };
