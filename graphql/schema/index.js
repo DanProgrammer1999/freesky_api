@@ -25,6 +25,7 @@ module.exports = buildSchema(`
     email: String!
     password: String!
     phone_number: String!
+    identity: UserIdentity
   }
 
   type UserIdentity {

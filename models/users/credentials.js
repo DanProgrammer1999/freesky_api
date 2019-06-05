@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
 
-const controllerSchema = new Schema({
+const credentialsSchema = new Schema({
   email: {
     type: String,
     required: true
@@ -14,7 +14,12 @@ const controllerSchema = new Schema({
   phone_number: {
     type: String,
     required: true
+  },
+  identity: {
+    type: Schema.Types.ObjectId,
+    ref: 'UserIdentity',
+    required: false
   }
 });
 
-module.exports = mongoose.model('UserCredentials', controllerSchema);
+module.exports = mongoose.model('UserCredentials', credentialsSchema);
