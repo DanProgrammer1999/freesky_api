@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
 
-const controllerSchema = new Schema({
+const identitySchema = new Schema({
   first_name: {
     type: String,
     required: true
@@ -37,4 +37,4 @@ const controllerSchema = new Schema({
   }
 });
 
-module.exports = mongoose.model('UserIdentity', controllerSchema);
+module.exports = mongoose.model('UserIdentity', identitySchema);
