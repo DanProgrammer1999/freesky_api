@@ -156,17 +156,25 @@ module.exports = {
   createIdentity: args => {
     const input = args.identityInput;
 
-    return find_credentials(input.credentials).then(credentials => {
-      const identity = new UserIdentity({
-        first_name: input.first_name,
-        last_name: input.last_name,
-        paternal_name: input.paternal_name,
-        address: input.address,
-        passport: input.passport,
-        credentials
+    const identity = new UserIdentity({
+      first_name: input.first_name,
+      last_name: input.last_name,
+      paternal_name: input.paternal_name,
+      address: input.address,
+      passport: input.passport,
+      credentials: input.credentials
+    });
+
+    return identity.save().then(result => {
+      UserCredentials.findById(input.credentials, (_, credentials) => {
+        credentials.identity = result.id;
+        credentials.save();
       });
 
-      return identity.save();
+      return {
+        ...identity._doc,
+        credentials: find_credentials.bind(this, input.credentials)
+      };
     });
   }
 };
