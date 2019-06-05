@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const { Schema } = mongoose;
 
-const uavSchema = new Schema({
+const uavModelSchema = new Schema({
   producer: {
     type: String,
     required: true
@@ -40,4 +40,4 @@ const uavSchema = new Schema({
 
 });
 
-module.exports = mongoose.model('UAVModel', uavSchema);
+module.exports = mongoose.model('UAVModel', uavModelSchema);
