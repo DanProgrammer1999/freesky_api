@@ -1,6 +1,9 @@
 import { buildSchema } from "graphql";
 
 module.exports = buildSchema(`
+  
+  scalar Date
+
   type UAV {
     _id: ID!
     serial_number: String!
@@ -39,6 +42,18 @@ module.exports = buildSchema(`
     credentials: UserCredentials!
   }
 
+  type Flight {
+    _id: ID!
+    uav: UAV!
+    coordinates: [String!]
+    min_height: Float
+    max_height: Float
+    main_dates: [Date!]
+    reserved_dates: [Date!]
+    flight_purpose: String
+    operator: UserIdentity!
+  }
+
   input UAVParams {
     serial_number: String!
     model: ID!
@@ -71,11 +86,23 @@ module.exports = buildSchema(`
     credentials: ID!
   }
 
+  input FlightParams {
+    uav: ID!
+    coordinates: [String!]
+    min_height: Float
+    max_height: Float
+    main_dates: [Date!]
+    reserved_dates: [Date!]
+    flight_purpose: String
+    operator: ID!
+  }
+
   type RootQuery {
     uavs: [UAV!]!
     uav_models: [UAVModel!]!
     user_credentials: [UserCredentials!]!
     user_identities: [UserIdentity!]!
+    flights: [Flight!]!
   }
 
   type RootMutation {
@@ -83,6 +110,7 @@ module.exports = buildSchema(`
     createUAVModel(uavModelInput: UAVModelParams): UAVModel
     createCredentials(credentialsInput: CredentialsParams): UserCredentials
     createIdentity(identityInput: IdentityParams): UserIdentity
+    createFlight(flightInput: FlightParams): Flight
   }
 
   schema {

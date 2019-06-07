@@ -8,6 +8,9 @@ import UAV from '../../models/uavs/uavs';
 import UAVModel from '../../models/uavs/models';
 import UserIdentity from '../../models/users/identity';
 import UserCredentials from '../../models/users/credentials';
+import Flight from '../../models/flights';
+import { GraphQLScalarType } from 'graphql';
+import { Kind } from 'graphql/language';
 
 const find_uavs = uavIds => {
   return UAV.find({ _id: { $in: uavIds } })
@@ -24,11 +27,17 @@ const find_uavs = uavIds => {
     });
 };
 
+const find_uav = uavId =>
+  UAV.findById(uavId).then(uav => ({
+    ...uav._doc,
+    model: find_uav_model.bind(this, uav._doc.model),
+    owner: find_identity.bind(this, uav._doc.owner)
+  }));
+
 const find_identity = identityId => {
   return UserIdentity.findById(identityId)
     .then(user => ({
       ...user._doc,
-      _id: user.id,
       uavs: find_uavs.bind(this, user._doc.uavs),
       credentials: find_credentials.bind(this, user._doc.credentials)
     }))
@@ -52,6 +61,32 @@ const find_credentials = id => {
 const find_uav_model = modelId => UAVModel.findById(modelId);
 
 module.exports = {
+  Date: new GraphQLScalarType({
+    name: 'Date',
+    description: 'Date custom scalar type',
+    parseValue(value) {
+      return new Date(value); // value from the client
+    },
+    serialize(value) {
+      return value.getTime(); // value sent to the client
+    },
+    parseLiteral(ast) {
+      if (ast.kind === Kind.INT) {
+        return parseInt(ast.value, 10); // ast value is always in string format
+      }
+      return null;
+    }
+  }),
+
+  flights: () =>
+    Flight.find().then(flights =>
+      flights.map(flight => ({
+        ...flight._doc,
+        uav: find_uav.bind(this, flight._doc.uav),
+        operator: find_identity.bind(this, flight._doc.operator)
+      }))
+    ),
+
   uavs: () =>
     UAV.find()
       .then(listOfUAVs =>
@@ -93,6 +128,17 @@ module.exports = {
       .catch(err => {
         throw err;
       }),
+
+  createFlight: args => {
+    const input = args.flightInput;
+    const flight = new Flight(input);
+
+    return flight.save().then(res => ({
+      ...res._doc,
+      uav: find_uav.bind(this, input.uav),
+      operator: find_identity.bind(this, input.operator)
+    }));
+  },
 
   createUAV: args => {
     const uav = new UAV({
