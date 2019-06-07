@@ -20,6 +20,10 @@ app.use(
   })
 );
 
+app.use('*', (req, res) => {
+  res.send("Page not found")
+})
+
 mongoose
   .connect(config.DATABASE_CLUSTER_URL, { useNewUrlParser: true })
   .then(() => app.listen(3000))
