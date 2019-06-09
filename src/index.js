@@ -21,7 +21,7 @@ app.use(
 );
 
 app.use('*', (req, res) => {
-  res.send("Page not found")
+  res.send("<h1>Page not found</h1>")
 })
 
 mongoose
