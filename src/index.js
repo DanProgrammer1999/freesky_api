@@ -26,7 +26,7 @@ app.use('*', (req, res) => {
 
 mongoose
   .connect(config.DATABASE_CLUSTER_URL, { useNewUrlParser: true })
-  .then(() => app.listen(3000))
+  .then(() => app.listen(1000))
   .catch(err => {
     throw err;
   });

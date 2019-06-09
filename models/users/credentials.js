@@ -22,4 +22,4 @@ const credentialsSchema = new Schema({
   }
 });
 
-module.exports = mongoose.model('UserCredentials', credentialsSchema);
+export default mongoose.model('UserCredentials', credentialsSchema);

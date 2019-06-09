@@ -25,4 +25,4 @@ const uavSchema = new Schema({
   }
 });
 
-module.exports = mongoose.model("UAV", uavSchema);
+export default mongoose.model("UAV", uavSchema);

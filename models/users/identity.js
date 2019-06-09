@@ -37,4 +37,4 @@ const identitySchema = new Schema({
   }
 });
 
-module.exports = mongoose.model('UserIdentity', identitySchema);
+export default mongoose.model('UserIdentity', identitySchema);
