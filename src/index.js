@@ -25,7 +25,7 @@ app.use(
 
 mongoose
   .connect(config.DATABASE_CLUSTER_URL, { useNewUrlParser: true })
-  .then(() => app.listen(3000))
+  .then(() => app.listen(process.env.PORT || 3000))
   .catch(err => {
     throw err;
   });
