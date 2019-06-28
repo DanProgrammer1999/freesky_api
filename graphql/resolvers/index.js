@@ -60,7 +60,7 @@ const find_credentials = id => {
 
 const find_uav_model = modelId => UAVModel.findById(modelId);
 
-module.exports = {
+export default {
   Date: new GraphQLScalarType({
     name: 'Date',
     description: 'Date custom scalar type',

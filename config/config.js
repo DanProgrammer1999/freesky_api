@@ -1,7 +1,7 @@
 import nodemon from "../nodemon.json";
 
 export default {
-  ROOT_ENDPOINT: "/api",
+  ROOT_ENDPOINT: "api",
   API_VERSION: "v1",
   GRAPHQL_ENDPOINT: "graphql",
 
